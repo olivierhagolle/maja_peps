@@ -10,7 +10,6 @@ from datetime import date
 
 ###########################################################################
 
-
 class OptionParser (optparse.OptionParser):
 
     def check_required(self, opt):
@@ -19,7 +18,6 @@ class OptionParser (optparse.OptionParser):
         # Assumes the option's 'default' is set to None!
         if getattr(self.values, option.dest) is None:
             self.error("%s option not supplied" % option)
-
 
 ###########################################################################
 
@@ -54,18 +52,13 @@ def parse_catalog(search_json_file):
                     # calcul de l'orbite relative pour Sentinel 1B
                     relativeOrbit = ((orbitN - 27) % 175) + 1
 
-            # print data["features"][i]["properties"]["productIdentifier"],data["features"][i]["id"],data["features"][i]["properties"]["startDate"],storage
-
+ 
                 if options.orbit is not None:
-                    if platform.startswith('S2'):
-                        if prod.find("_R%03d" % options.orbit) > 0:
-
-                            download_dict[prod] = feature_id
-                            storage_dict[prod] = storage
-                    elif platform.startswith('S1'):
-                        if relativeOrbit == options.orbit:
-                            download_dict[prod] = feature_id
-                            storage_dict[prod] = storage
+                    if prod.find("_R%03d" % options.orbit) > 0:
+                        download_dict[prod] = feature_id
+                        storage_dict[prod] = storage
+                        size_dict[prod] = resourceSize
+ 
                 else:
                     download_dict[prod] = feature_id
                     storage_dict[prod] = storage
@@ -126,13 +119,20 @@ else:
                       help="Orbit Path number", default=None)
     parser.add_option("-f", "--end_date", dest="end_date", action="store", type="string",
                       help="end date, fmt('2015-12-23')", default='9999-01-01')
+    parser.add_option("-p", "--prod_list", dest="prod_list", action="store", type="string",
+                      help="file which contains the list of products to download", default=None)
+
     parser.add_option("--json", dest="search_json_file", action="store", type="string",
                       help="Output search JSON filename", default=None)
     parser.add_option("--windows", dest="windows", action="store_true",
                       help="For windows usage", default=False)
 
     (options, args) = parser.parse_args()
+    parser.check_required("-a")
+    parser.check_required("-p")
 
+
+    
 if options.search_json_file is None or options.search_json_file == "":
     options.search_json_file = 'search.json'
 
@@ -205,7 +205,7 @@ if options.windows:
 
 print(search_catalog)
 os.system(search_catalog)
-time.sleep(5)
+time.sleep(1)
 
 prod, download_dict, storage_dict, size_dict = parse_catalog(options.search_json_file)
 
@@ -214,14 +214,31 @@ prod, download_dict, storage_dict, size_dict = parse_catalog(options.search_json
 # =====================
 
 
+
 if len(download_dict) == 0:
     print("No product matches the criteria")
-else:
-    # first try for the products on tape
+    sys.exit(-1)
+
+print("\nlist of products retrieved by catalog request")
+for i,prod in enumerate(list(download_dict.keys())):
+    print(i,prod)
+
+
+nb_prod = len(download_dict)
+confirm="yes"
+if nb_prod >= 4:
+    confirm = raw_input("\n## You are about to ask for production of %s products, please confirm (yes/no)\n")
+
+if confirm == "yes":
     if options.write_dir is None:
         options.write_dir = os.getcwd()
 
-    for prod in list(download_dict.keys()):
-        if (not(options.no_download)):
-            get_product = 'curl -o %s.tmp -k -u "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=MAJA&datainputs=product=%s&storeExecuteResponse=true&status=true&title=Maja-Process"' % (prod, email, passwd, prod)
-            os.system(get_product)
+    with open(options.prod_list,"w") as f_out:
+        for prod in list(download_dict.keys()):
+            f_out.write("%s\n" % prod)            
+            if (not(options.no_download)):
+                start_maja = 'curl -o %s.log -k -u "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=MAJA&datainputs=product=%s&storeExecuteResponse=true&status=true&title=Maja-Process"' % (prod, email, passwd, prod)
+                print (start_maja)
+                os.system(start_maja)
+
+
