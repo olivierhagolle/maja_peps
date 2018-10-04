@@ -34,8 +34,9 @@ The processing at peps takes between one or two hours. For this reason, the dowl
 
  - `python peps_maja_download.py -p prod_list_toulouse.txt -a peps.txt -w /mnt/data/PEPS_MAJA'
 
-which checks the completion of the products listed in prod_list_toulouse.txt, and eventually download them to the specified directory /mnt/data/PEPS_MAJA
+checks the completion of the products listed in prod_list_toulouse.txt, and eventually download them to the specified directory /mnt/data/PEPS_MAJA
 
+If a few products are not completed yet, you will have to try again later.
 
 ## Authentification 
 
