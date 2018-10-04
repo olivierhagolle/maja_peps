@@ -13,11 +13,11 @@ This code relies on python (should work with python 2 and 3), and on the curl ut
 
 ### peps_maja_process
 
-This software is still quite basic, but if you have an account at PEPS, you may download products using command lines like 
+This script will ask PEPS to process a series of products based on a catalog request which can be made according to various criteria.  Then the processing is schedule. If more than 10 products are to be ordered, a confirmation is asked to the user, to avoid submitting erroneous requests to PEPS. 
 
 - `python ./peps_maja_process.py  -l Toulouse -a peps.txt -d 2017-11-01 -f 2017-12-01 -p prod_list_toulouse.txt` 
 
- which downloads the *Sentinel-2 DataTake products*  acquired in November 2017 above Toulouse. When you provide a date YY-MM-DD, it is actually YY-MM-DD:00:00:00. So a request with `-d 2015-11-01 -f 2015-11-01` will yield no result, while `-d 2015-11-01 -f 2015-11-02` will yield data acquired on 2015-11-01 (provided they exist). The list of ordered L2A products is stored in prod_list_toulouse.txt
+will submit Maja processing for the Sentinel-2 L1C products acquired in November 2017 above Toulouse. When you provide a date YY-MM-DD, it is actually YY-MM-DD:00:00:00. So a request with `-d 2015-11-01 -f 2015-11-01` will yield no result, while `-d 2015-11-01 -f 2015-11-02` will yield data acquired on 2015-11-01 (provided they exist). The list of ordered L2A products is stored in prod_list_toulouse.txt
 
 
 - `python ./peps_maja_process.py  --lon 1 --lat 43.5 -a peps.txt -d 2017-11-01 -f 2017-12-01 -p prod_list_toulouse.txt`
