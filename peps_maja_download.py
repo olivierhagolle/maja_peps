@@ -43,8 +43,9 @@ def parse_status(prod):
             if ligne.find("zip")>=0 and finished is True:
                 print ligne
                 download_url = ligne.split('"')[1]
+                L2A_name= download_url.split('/')[-1]
                  
-    return finished, download_url
+    return finished, download_url, L2A_name
 
 
 # ===================== MAIN
@@ -106,7 +107,6 @@ prod_list=[]
 for ligne in lignes:
     prod_list.append(ligne.strip())
 
-print prod_list
 # check processing completion and download
 for prod in prod_list:
     # get status file
@@ -117,14 +117,17 @@ for prod in prod_list:
     os.system(get_status)
 
     # Check status 
-    (finished, download_url) = parse_status(prod)
-    if finished is True:
+    (finished, download_url, L2A_name) = parse_status(prod)
+    if finished is True and not(os.path.exists("%s/%s"% (options.write_dir, L2A_name))):
         get_product = 'curl -o %s.tmp -k -u  "%s:%s" "%s"' % (prod, email, passwd, download_url)
         print get_product
         os.system(get_product)
-        os.rename("%s.tmp"% prod, "%s/%s.zip" % (options.write_dir, prod))
-        print("\n #### completed download of %s/%s.zip #### \n" % (options.write_dir, prod))
+        os.rename("%s.tmp"% prod, "%s/%s" % (options.write_dir, L2A_name))
+        print("\n #### completed download of %s/%s #### \n" % (options.write_dir, L2A_name))
     else:
-        print("\n #### processing of %s not completed #### \n" % prod)
+        if os.path.exists("%s/%s"% (options.write_dir, L2A_name)):
+            print ("\n #### %s already downloaded #### \n" % prod)
+        else :
+            print("\n #### processing of %s not completed #### \n" % prod)
 
 
