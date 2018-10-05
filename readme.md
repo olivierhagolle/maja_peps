@@ -1,7 +1,8 @@
 # peps_maja
 PEPS is the French Sentinel collaborative ground segment : https://peps.cnes.fr. PEPS is mirroring all the Sentinel data provided by ESA, and is providing a simplified access. It also implements a few processors.This repository contains two scripts to submit and downloadMAJA L2A products from PEPS:
 
-- peps_maja_process.py is a piece of code to ask [PEPS](https://peps.cnes.fr) to process Sentinel-2 products with MAJA. - peps_maja_download.py checks if the processing is completed and eventually downloads the products. 
+- peps_maja_process.py is a piece of code to ask [PEPS](https://peps.cnes.fr) to process Sentinel-2 products with MAJA. 
+- peps_maja_download.py checks if the processing is completed and eventually downloads the products. 
 
 This code was written thanks to the precious help of one of my colleagues at CNES, Christophe Taillan, who implemented MAJA production within Peps.
 
