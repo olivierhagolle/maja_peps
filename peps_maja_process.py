@@ -2,8 +2,10 @@
 # -*- coding: iso-8859-1 -*-
 """
 Submits a L2A processing with MAJA to PEPS.
-Products are selected through a catalog request.
-If more than 10 products are retrieved by the catalog request a confirmation is necessary. 
+- Products are selected through a catalog request.
+  - use peps_maja_request.py -h to see the available options
+- If more than 10 products are retrieved by the catalog request a confirmation is necessary.
+- Before starting production, please use -n option to check the products retrieved
 """
 import json
 import time
@@ -87,13 +89,12 @@ if len(sys.argv) == 1:
     print('      ' + sys.argv[0] + ' [options]')
     print("     Aide : ", prog, " --help")
     print("        ou : ", prog, " -h")
-    print("example 1 : python %s -l 'Toulouse' -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0])
-    print("example 2 : python %s --lon 1 --lat 44 -a peps.txt -d 2015-11-01 -f 2015-12-01 -c S2" % sys.argv[0])
-    print("example 3 : python %s --lonmin 1 --lonmax 2 --latmin 43 --latmax 44 -a peps.txt -d 2015-11-01 -f 2015-12-01 -c S2" %
+    print("example 1 : python %s -l Toulouse -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0])
+    print("example 2 : python %s --lon 1 --lat 44 -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0])
+    print("example 3 : python %s --lonmin 1 --lonmax 2 --latmin 43 --latmax 44 -a peps.txt -d 2016-12-06 -f 2017-02-01-c S2" %
           sys.argv[0])
-    print("example 4 : python %s -l 'Toulouse' -a peps.txt -c SpotWorldHeritage -p SPOT4 -d 2005-11-01 -f 2006-12-01" %
+    print("example 4 : python %s -t 31TFJ -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0]) %
           sys.argv[0])
-    print("example 5 : python %s -c S1 -p GRD -l 'Toulouse' -a peps.txt -d 2015-11-01 -f 2015-12-01" % sys.argv[0])
     sys.exit(-1)
 else:
     usage = "usage: %prog [options] "
@@ -109,6 +110,8 @@ else:
                       help="Do not download products, just print curl command", default=False)
     parser.add_option("-d", "--start_date", dest="start_date", action="store", type="string",
                       help="start date, fmt('2015-12-22')", default=None)
+    parser.add_option("-t", "--tile", dest="tile", action="store", type="string",
+                      help="Sentinel-2 tile number", default=None)
     parser.add_option("--lat", dest="lat", action="store", type="float",
                       help="latitude in decimal degrees", default=None)
     parser.add_option("--lon", dest="lon", action="store", type="float",
@@ -136,35 +139,44 @@ else:
     (options, args) = parser.parse_args()
     parser.check_required("-a")
     parser.check_required("-p")
-
-
     
 if options.search_json_file is None or options.search_json_file == "":
     options.search_json_file = 'search.json'
 
-if options.location is None:
-    if options.lat is None or options.lon is None:
-        if (options.latmin is None) or (options.lonmin is None) or (options.latmax is None) or (options.lonmax is None):
-            print("provide at least a point or rectangle")
-            sys.exit(-1)
+#determine location request
+if options.tile is None:
+    if options.location is None:
+        if options.lat is None or options.lon is None:
+            if (options.latmin is None) or (options.lonmin is None) or (options.latmax is None) or (options.lonmax is None):
+                print("provide at least a point or rectangle")
+                sys.exit(-1)
+            else:
+                geom = 'rectangle'
         else:
-            geom = 'rectangle'
-    else:
-        if (options.latmin is None) and (options.lonmin is None) and (options.latmax is None) and (options.lonmax is None):
-            geom = 'point'
-        else:
-            print("please choose between point and rectangle, but not both")
-            sys.exit(-1)
+            if (options.latmin is None) and (options.lonmin is None) and (options.latmax is None) and (options.lonmax is None):
+                geom = 'point'
+            else:
+                print("please choose between point and rectangle, but not both")
+                sys.exit(-1)
 
-else:
-    if (options.latmin is None) and (options.lonmin is None) and (options.latmax is None) and (options.lonmax is None) and (options.lat is None) or (options.lon is None):
-        geom = 'location'
     else:
-        print("please choose location and coordinates, but not both")
-        sys.exit(-1)
+        if (options.latmin is None) and (options.lonmin is None) and (options.latmax is None) and (options.lonmax is None) and (options.lat is None) or (options.lon is None):
+            geom = 'location'
+        else:
+            print("please choose location and coordinates, but not both")
+            sys.exit(-1)
 
 # geometric parameters of catalog request
-if geom == 'point':
+if options.tile is not None:
+    if options.tile.startswith('T') and len(options.tile)==6:
+        tileid = options.tile[1:6]
+    elif len(options.tile)==5:
+        tileid = options.tile[0:5]
+    else:
+        print("tile name is ill-formated : 31TCJ or T31TCJ are allowed")
+        sys.exit(-4)
+    query_geom="tileid=%s"%(tileid)
+elif geom == 'point':
     query_geom = 'lat=%f\&lon=%f' % (options.lat, options.lon)
 elif geom == 'rectangle':
     query_geom = 'box={lonmin},{latmin},{lonmax},{latmax}'.format(
