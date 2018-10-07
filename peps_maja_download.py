@@ -42,6 +42,7 @@ def parse_status(prod):
     """ checks if processing is completed """
     finished = False
     download_url = None
+    L2A_name = None
     with open("%s.stat" % prod) as ftmp:
         for ligne in ftmp.readlines():
             if ligne.find("FINISHED") > 0:
@@ -115,7 +116,6 @@ for ligne in lignes:
 for prod in prod_list:
     # get status file
     wpsId = parse_launch_feedback(prod)
-    print wpsId
     get_status = 'curl -o %s.stat -k -u  "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=\[wps_id=%s\]"' % (prod, email, passwd, wpsId)
     print(get_status)
     os.system(get_status)
