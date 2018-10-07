@@ -91,10 +91,8 @@ if len(sys.argv) == 1:
     print("        ou : ", prog, " -h")
     print("example 1 : python %s -l Toulouse -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0])
     print("example 2 : python %s --lon 1 --lat 44 -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0])
-    print("example 3 : python %s --lonmin 1 --lonmax 2 --latmin 43 --latmax 44 -a peps.txt -d 2016-12-06 -f 2017-02-01-c S2" %
-          sys.argv[0])
-    print("example 4 : python %s -t 31TFJ -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0]) %
-          sys.argv[0])
+    print("example 3 : python %s --lonmin 1 --lonmax 2 --latmin 43 --latmax 44 -a peps.txt -d 2016-12-06 -f 2017-02-01-c S2" % sys.argv[0])
+    print("example 4 : python %s -t 31TFJ -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0]) 
     sys.exit(-1)
 else:
     usage = "usage: %prog [options] "
