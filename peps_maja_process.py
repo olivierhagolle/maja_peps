@@ -1,5 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+"""
+Submits a L2A processing with MAJA to PEPS.
+Products are selected through a catalog request.
+If more than 10 products are retrieved by the catalog request a confirmation is necessary. 
+"""
 import json
 import time
 import os
@@ -22,6 +27,7 @@ class OptionParser (optparse.OptionParser):
 ###########################################################################
 
 def parse_catalog(search_json_file):
+    """ parses the results of catalog request"""
     # Filter catalog result
     with open(search_json_file) as data_file:
         data = json.load(data_file)
@@ -226,8 +232,8 @@ for i,prod in enumerate(list(download_dict.keys())):
 
 nb_prod = len(download_dict)
 confirm="yes"
-if nb_prod >= 4:
-    confirm = raw_input("\n## You are about to ask for production of %s products, please confirm (yes/no)\n")
+if nb_prod >= 10:
+    confirm = raw_input("\n## You are about to ask for production of %s products, please confirm (yes/no)\n" % nb_prod)
 
 if confirm == "yes":
     if options.write_dir is None:

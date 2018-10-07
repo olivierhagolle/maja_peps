@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+"""
+Checks if a maja processing submitted to PEPS is completed.
+If completed, the product is downloaded   
+"""
 import json
 import time
 import os
@@ -24,6 +28,7 @@ class OptionParser (optparse.OptionParser):
 ###########################################################################
 
 def parse_launch_feedback(prod):
+    """ Gets processing Id """
     with open("%s.log" % prod) as ftmp:
         for ligne in ftmp.readlines():
             if ligne.find("statusLocation") > 0:
@@ -34,6 +39,7 @@ def parse_launch_feedback(prod):
 
 
 def parse_status(prod):
+    """ checks if processing is completed """
     finished = False
     download_url = None
     with open("%s.stat" % prod) as ftmp:
@@ -75,8 +81,6 @@ else:
     (options, args) = parser.parse_args()
     parser.check_required("-p")
     parser.check_required("-a")
-
-
 
 
 # ====================
