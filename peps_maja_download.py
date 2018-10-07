@@ -40,19 +40,23 @@ def parse_launch_feedback(prod):
 
 def parse_status(prod):
     """ checks if processing is completed """
-    finished = False
+    status = "computing"
     download_url = None
     L2A_name = None
     with open("%s.stat" % prod) as ftmp:
         for ligne in ftmp.readlines():
+            if ligne.find("percentCompleted")>0:
+                percent= int(ligne.split(":")[1].split(",")[0])
             if ligne.find("FINISHED") > 0:
-                finished = True
-            if ligne.find("zip")>=0 and finished is True:
+                status = "finished"
+            if ligne.find("CANCELED") > 0:
+                status = "canceled"                
+            if ligne.find("zip")>=0 and status == "finished":
                 print ligne
                 download_url = ligne.split('"')[1]
                 L2A_name= download_url.split('/')[-1]
                  
-    return finished, download_url, L2A_name
+    return percent, status, download_url, L2A_name
 
 
 # ===================== MAIN
@@ -121,17 +125,21 @@ for prod in prod_list:
     os.system(get_status)
 
     # Check status 
-    (finished, download_url, L2A_name) = parse_status(prod)
-    if finished is True and not(os.path.exists("%s/%s"% (options.write_dir, L2A_name))):
+    (percent, status, download_url, L2A_name) = parse_status(prod)
+    if status == "finished" and not(os.path.exists("%s/%s"% (options.write_dir, L2A_name))):
         get_product = 'curl -o %s.tmp -k -u  "%s:%s" "%s"' % (prod, email, passwd, download_url)
         print get_product
         os.system(get_product)
         os.rename("%s.tmp"% prod, "%s/%s" % (options.write_dir, L2A_name))
         print("\n #### completed download of %s/%s #### \n" % (options.write_dir, L2A_name))
+    elif status == "canceled":
+        print("\n #### processing was canceled #### ")
+        print("can happen outside |lat|<60° for lack of SRTM DEM\n") 
     else:
         if os.path.exists("%s/%s"% (options.write_dir, L2A_name)):
             print ("\n #### %s already downloaded #### \n" % prod)
         else :
             print("\n #### processing of %s not completed #### \n" % prod)
+            print("percentage processed : %s" % percent)
 
 
