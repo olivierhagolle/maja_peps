@@ -27,9 +27,9 @@ class OptionParser (optparse.OptionParser):
 
 ###########################################################################
 
-def parse_launch_feedback(prod):
+def parse_launch_feedback(log_prod):
     """ Gets processing Id """
-    with open("%s.log" % prod) as ftmp:
+    with open(log_prod) as ftmp:
         for ligne in ftmp.readlines():
             if ligne.find("statusLocation") > 0:
                 status_url = ligne.split("statusLocation")[1].split('"')[1]
@@ -38,12 +38,12 @@ def parse_launch_feedback(prod):
 ###########################################################################
 
 
-def parse_status(prod):
+def parse_status(stat_prod):
     """ checks if processing is completed """
     status = "computing"
     download_url = None
     L2A_name = None
-    with open("%s.stat" % prod) as ftmp:
+    with open(stat_prod) as ftmp:
         for ligne in ftmp.readlines():
             if ligne.find("percentCompleted")>0:
                 percent= int(ligne.split(":")[1].split(",")[0])
@@ -118,14 +118,16 @@ for ligne in lignes:
 
 # check processing completion and download
 for prod in prod_list:
+    log_prod = os.path.dirname(options.prod_list)+ os.sep + prod + '.log'
     # get status file
-    wpsId = parse_launch_feedback(prod)
-    get_status = 'curl -o %s.stat -k -u  "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=\[wps_id=%s\]"' % (prod, email, passwd, wpsId)
+    wpsId = parse_launch_feedback(log_prod)
+    stat_prod = os.path.dirname(options.prod_list) + os.sep + prod + '.stat'
+    get_status = 'curl -o %s -k -u  "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=\[wps_id=%s\]"' % (stat_prod, email, passwd, wpsId)
     print(get_status)
     os.system(get_status)
 
     # Check status 
-    (percent, status, download_url, L2A_name) = parse_status(prod)
+    (percent, status, download_url, L2A_name) = parse_status(stat_prod)
     if status == "finished" and not(os.path.exists("%s/%s"% (options.write_dir, L2A_name))):
         get_product = 'curl -o %s.tmp -k -u  "%s:%s" "%s"' % (prod, email, passwd, download_url)
         print get_product
