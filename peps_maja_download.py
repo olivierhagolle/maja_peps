@@ -87,6 +87,9 @@ else:
     parser.check_required("-p")
     parser.check_required("-a")
 
+    if options.write_dir is None:
+        options.write_dir = os.getcwd()
+
 
 # ====================
 # read authentification file
@@ -118,10 +121,10 @@ for ligne in lignes:
 
 # check processing completion and download
 for prod in prod_list:
-    log_prod = os.path.dirname(options.prod_list)+ os.sep + prod + '.log'
     # get status file
+    log_prod = os.path.join(options.write_dir, str(prod + '.log'))
     wpsId = parse_launch_feedback(log_prod)
-    stat_prod = os.path.dirname(options.prod_list) + os.sep + prod + '.stat'
+    stat_prod = os.path.join(options.write_dir, str(prod + '.stat'))
     get_status = 'curl -o %s -k -u  "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=\[wps_id=%s\]"' % (stat_prod, email, passwd, wpsId)
     print(get_status)
     os.system(get_status)

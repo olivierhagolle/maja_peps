@@ -250,11 +250,10 @@ if confirm == "yes":
         options.write_dir = os.getcwd()
 
     with open(options.prod_list,"w") as f_out:
-        folder = os.path.dirname(options.prod_list)
         for prod in list(download_dict.keys()):
             f_out.write("%s\n" % prod)            
             if (not(options.no_download)):
-                log_prod = folder + os.sep + prod + '.log'
+                log_prod = os.path.join(options.write_dir, str(prod + '.log'))
                 start_maja = 'curl -o %s -k -u "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=MAJA&datainputs=product=%s&storeExecuteResponse=true&status=true&title=Maja-Process"' % (log_prod, email, passwd, prod)
                 print (start_maja)
                 os.system(start_maja)
