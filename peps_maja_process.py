@@ -89,10 +89,10 @@ if len(sys.argv) == 1:
     print('      ' + sys.argv[0] + ' [options]')
     print("     Aide : ", prog, " --help")
     print("        ou : ", prog, " -h")
-    print("example 1 : python %s -l Toulouse -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0])
-    print("example 2 : python %s --lon 1 --lat 44 -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0])
-    print("example 3 : python %s --lonmin 1 --lonmax 2 --latmin 43 --latmax 44 -a peps.txt -d 2016-12-06 -f 2017-02-01-c S2" % sys.argv[0])
-    print("example 4 : python %s -t 31TFJ -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" % sys.argv[0]) 
+    print("example 1 : python %s -l Toulouse -a peps.txt -d 2016-12-06 -f 2017-02-01 -p maja_products.txt -w /mnt/data/MAJA" % sys.argv[0])
+    print("example 2 : python %s --lon 1 --lat 44 -a peps.txt -d 2016-12-06 -f 2017-02-01  -p maja_products.txt" % sys.argv[0])
+    print("example 3 : python %s --lonmin 1 --lonmax 2 --latmin 43 --latmax 44 -a peps.txt -d 2016-12-06 -f 2017-02-01 -p maja_products.txt" % sys.argv[0])
+    print("example 4 : python %s -t 31TFJ -a peps.txt -d 2016-12-06 -f 2017-02-01  -p maja_products.txt" % sys.argv[0]) 
     sys.exit(-1)
 else:
     usage = "usage: %prog [options] "
@@ -141,6 +141,10 @@ else:
 if options.search_json_file is None or options.search_json_file == "":
     options.search_json_file = 'search.json'
 
+if not(os.path.exists(options.write_dir)):
+    print("The output directory %s does not exist" % options.write_dir)
+    sys.exit(-1)
+    
 #determine location request
 if options.tile is None:
     if options.location is None:
@@ -255,6 +259,7 @@ if confirm == "yes":
             if (not(options.no_download)):
                 log_prod = os.path.join(options.write_dir, str(prod + '.log'))
                 start_maja = 'curl -o %s -k -u "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=MAJA&datainputs=product=%s&storeExecuteResponse=true&status=true&title=Maja-Process"' % (log_prod, email, passwd, prod)
+                print("*** submission of maja processing of %s ***" % prod)
                 print (start_maja)
                 os.system(start_maja)
 
