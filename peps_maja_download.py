@@ -43,6 +43,7 @@ def parse_status(stat_prod):
     status = "computing"
     download_url = None
     L2A_name = None
+    percent=0
     with open(stat_prod) as ftmp:
         for ligne in ftmp.readlines():
             if ligne.find("percentCompleted")>0:
