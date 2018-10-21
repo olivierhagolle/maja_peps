@@ -17,6 +17,7 @@ from datetime import date
 
 ###########################################################################
 
+
 class OptionParser (optparse.OptionParser):
 
     def check_required(self, opt):
@@ -27,6 +28,7 @@ class OptionParser (optparse.OptionParser):
             self.error("%s option not supplied" % option)
 
 ###########################################################################
+
 
 def parse_catalog(search_json_file):
     """ parses the results of catalog request"""
@@ -60,13 +62,12 @@ def parse_catalog(search_json_file):
                     # calcul de l'orbite relative pour Sentinel 1B
                     relativeOrbit = ((orbitN - 27) % 175) + 1
 
- 
                 if options.orbit is not None:
                     if prod.find("_R%03d" % options.orbit) > 0:
                         download_dict[prod] = feature_id
                         storage_dict[prod] = storage
                         size_dict[prod] = resourceSize
- 
+
                 else:
                     download_dict[prod] = feature_id
                     storage_dict[prod] = storage
@@ -89,10 +90,14 @@ if len(sys.argv) == 1:
     print('      ' + sys.argv[0] + ' [options]')
     print("     Aide : ", prog, " --help")
     print("        ou : ", prog, " -h")
-    print("example 1 : python %s -l Toulouse -a peps.txt -d 2016-12-06 -f 2017-02-01 -p maja_products.txt -w /mnt/data/MAJA" % sys.argv[0])
-    print("example 2 : python %s --lon 1 --lat 44 -a peps.txt -d 2016-12-06 -f 2017-02-01  -p maja_products.txt" % sys.argv[0])
-    print("example 3 : python %s --lonmin 1 --lonmax 2 --latmin 43 --latmax 44 -a peps.txt -d 2016-12-06 -f 2017-02-01 -p maja_products.txt" % sys.argv[0])
-    print("example 4 : python %s -t 31TFJ -a peps.txt -d 2016-12-06 -f 2017-02-01  -p maja_products.txt" % sys.argv[0]) 
+    print("example 1 : python %s -l Toulouse -a peps.txt -d 2016-12-06 -f 2017-02-01 -p maja_products.txt -w /mnt/data/MAJA" %
+          sys.argv[0])
+    print("example 2 : python %s --lon 1 --lat 44 -a peps.txt -d 2016-12-06 -f 2017-02-01  -p maja_products.txt" %
+          sys.argv[0])
+    print("example 3 : python %s --lonmin 1 --lonmax 2 --latmin 43 --latmax 44 -a peps.txt -d 2016-12-06 -f 2017-02-01 -p maja_products.txt" %
+          sys.argv[0])
+    print("example 4 : python %s -t 31TFJ -a peps.txt -d 2016-12-06 -f 2017-02-01  -p maja_products.txt" %
+          sys.argv[0])
     sys.exit(-1)
 else:
     usage = "usage: %prog [options] "
@@ -137,15 +142,15 @@ else:
     (options, args) = parser.parse_args()
     parser.check_required("-a")
     parser.check_required("-p")
-    
+
 if options.search_json_file is None or options.search_json_file == "":
     options.search_json_file = 'search.json'
 
 if not(os.path.exists(options.write_dir)):
     print("The output directory %s does not exist" % options.write_dir)
     sys.exit(-1)
-    
-#determine location request
+
+# determine location request
 if options.tile is None:
     if options.location is None:
         if options.lat is None or options.lon is None:
@@ -170,14 +175,14 @@ if options.tile is None:
 
 # geometric parameters of catalog request
 if options.tile is not None:
-    if options.tile.startswith('T') and len(options.tile)==6:
+    if options.tile.startswith('T') and len(options.tile) == 6:
         tileid = options.tile[1:6]
-    elif len(options.tile)==5:
+    elif len(options.tile) == 5:
         tileid = options.tile[0:5]
     else:
         print("tile name is ill-formated : 31TCJ or T31TCJ are allowed")
         sys.exit(-4)
-    query_geom="tileid=%s"%(tileid)
+    query_geom = "tileid=%s" % (tileid)
 elif geom == 'point':
     query_geom = 'lat=%f\&lon=%f' % (options.lat, options.lon)
 elif geom == 'rectangle':
@@ -193,7 +198,6 @@ if options.start_date is not None:
         end_date = options.end_date
     else:
         end_date = date.today().isoformat()
-
 
 
 # ====================
@@ -218,7 +222,8 @@ if os.path.exists(options.search_json_file):
 # search in catalog
 # ====================
 
-search_catalog = 'curl -k -o %s https://peps.cnes.fr/resto/api/collections/S2ST/search.json?%s\&startDate=%s\&completionDate=%s\&maxRecords=500\&productType=S2MSI1C' % (options.search_json_file, query_geom, start_date, end_date)
+search_catalog = 'curl -k -o %s https://peps.cnes.fr/resto/api/collections/S2ST/search.json?%s\&startDate=%s\&completionDate=%s\&maxRecords=500\&productType=S2MSI1C' % (
+    options.search_json_file, query_geom, start_date, end_date)
 
 if options.windows:
     search_catalog = search_catalog.replace('\&', '^&')
@@ -234,33 +239,32 @@ prod, download_dict, storage_dict, size_dict = parse_catalog(options.search_json
 # =====================
 
 
-
 if len(download_dict) == 0:
     print("No product matches the criteria")
     sys.exit(-1)
 
 print("\nlist of products retrieved by catalog request")
-for i,prod in enumerate(list(download_dict.keys())):
-    print(i,prod)
+for i, prod in enumerate(list(download_dict.keys())):
+    print(i, prod)
 
 
 nb_prod = len(download_dict)
-confirm="yes"
+confirm = "yes"
 if nb_prod >= 10:
-    confirm = raw_input("\n## You are about to ask for production of %s products, please confirm (yes/no)\n" % nb_prod)
+    confirm = raw_input(
+        "\n## You are about to ask for production of %s products, please confirm (yes/no)\n" % nb_prod)
 
 if confirm == "yes":
     if options.write_dir is None:
         options.write_dir = os.getcwd()
 
-    with open(options.prod_list,"w") as f_out:
+    with open(options.prod_list, "w") as f_out:
         for prod in list(download_dict.keys()):
-            f_out.write("%s\n" % prod)            
+            f_out.write("%s\n" % prod)
             if (not(options.no_download)):
                 log_prod = os.path.join(options.write_dir, str(prod + '.log'))
-                start_maja = 'curl -o %s -k -u "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=MAJA&datainputs=product=%s&storeExecuteResponse=true&status=true&title=Maja-Process"' % (log_prod, email, passwd, prod)
+                start_maja = 'curl -o %s -k -u "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=MAJA&datainputs=product=%s&storeExecuteResponse=true&status=true&title=Maja-Process"' % (
+                    log_prod, email, passwd, prod)
                 print("*** submission of maja processing of %s ***" % prod)
                 print (start_maja)
                 os.system(start_maja)
-
-

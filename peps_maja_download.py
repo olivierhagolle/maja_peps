@@ -2,15 +2,12 @@
 # -*- coding: iso-8859-1 -*-
 """
 Checks if a maja processing submitted to PEPS is completed.
-If completed, the product is downloaded   
+If completed, the product is downloaded
 """
-import json
-import time
 import os
 import os.path
 import optparse
 import sys
-from datetime import date
 
 ###########################################################################
 
@@ -43,20 +40,19 @@ def parse_status(stat_prod):
     status = "computing"
     download_url = None
     L2A_name = None
-    percent=0
+    percent = 0
     with open(stat_prod) as ftmp:
         for ligne in ftmp.readlines():
-            if ligne.find("percentCompleted")>0:
-                percent= int(ligne.split(":")[1].split(",")[0])
+            if ligne.find("percentCompleted") > 0:
+                percent = int(ligne.split(":")[1].split(",")[0])
             if ligne.find("FINISHED") > 0:
                 status = "finished"
             if ligne.find("CANCELED") > 0:
-                status = "canceled"                
-            if ligne.find("zip")>=0 and status == "finished":
+                status = "canceled"
+            if ligne.find("zip") >= 0 and status == "finished":
                 print ligne
                 download_url = ligne.split('"')[1]
-                L2A_name= download_url.split('/')[-1]
-                 
+                L2A_name = download_url.split('/')[-1]
     return percent, status, download_url, L2A_name
 
 
@@ -69,7 +65,7 @@ if len(sys.argv) == 1:
     print('      ' + sys.argv[0] + ' [options]')
     print("     Aide : ", prog, " --help")
     print("        ou : ", prog, " -h")
-    print("example : python %s -p prod_list.txt -a peps.txt -w /mnt/data/MAJA_PEPS" % sys.argv[0]) 
+    print("example : python %s -p prod_list.txt -a peps.txt -w /mnt/data/MAJA_PEPS" % sys.argv[0])
 
     sys.exit(-1)
 else:
@@ -82,7 +78,6 @@ else:
                       help="Path where the products should be downloaded", default='.')
     parser.add_option("-a", "--auth", dest="auth", action="store", type="string",
                       help="Peps account and password file")
-
 
     (options, args) = parser.parse_args()
     parser.check_required("-p")
@@ -101,22 +96,22 @@ try:
     if passwd.endswith('\n'):
         passwd = passwd[:-1]
     f.close()
-except:
+except IOError:
     print("error with password file")
     sys.exit(-2)
-    
+
 # ====================
 # read product list
-#=====================
+# =====================
 
 try:
     with open(options.prod_list) as f:
-        lignes=f.readlines()
+        lignes = f.readlines()
 except IOError:
     print("error with product list file")
     sys.exit(-2)
 
-prod_list=[]
+prod_list = []
 for ligne in lignes:
     prod_list.append(ligne.strip())
 
@@ -126,26 +121,25 @@ for prod in prod_list:
     log_prod = os.path.join(options.write_dir, str(prod + '.log'))
     wpsId = parse_launch_feedback(log_prod)
     stat_prod = os.path.join(options.write_dir, str(prod + '.stat'))
-    get_status = 'curl -o %s -k -u  "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=\[wps_id=%s\]"' % (stat_prod, email, passwd, wpsId)
+    get_status = 'curl -o %s -k -u  "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=\[wps_id=%s\]"' % (
+        stat_prod, email, passwd, wpsId)
     print(get_status)
     os.system(get_status)
 
-    # Check status 
+    # Check status
     (percent, status, download_url, L2A_name) = parse_status(stat_prod)
-    if status == "finished" and not(os.path.exists("%s/%s"% (options.write_dir, L2A_name))):
+    if status == "finished" and not(os.path.exists("%s/%s" % (options.write_dir, L2A_name))):
         get_product = 'curl -o %s.tmp -k -u  "%s:%s" "%s"' % (prod, email, passwd, download_url)
         print get_product
         os.system(get_product)
-        os.rename("%s.tmp"% prod, "%s/%s" % (options.write_dir, L2A_name))
+        os.rename("%s.tmp" % prod, "%s/%s" % (options.write_dir, L2A_name))
         print("\n #### completed download of %s/%s #### \n" % (options.write_dir, L2A_name))
     elif status == "canceled":
         print("\n #### processing was canceled #### ")
-        print("can happen outside |lat|<60° for lack of SRTM DEM\n") 
+        print("can happen outside |lat|<60° for lack of SRTM DEM\n")
     else:
-        if os.path.exists("%s/%s"% (options.write_dir, L2A_name)):
+        if os.path.exists("%s/%s" % (options.write_dir, L2A_name)):
             print ("\n #### %s already downloaded #### \n" % prod)
-        else :
+        else:
             print("\n #### processing of %s not completed #### \n" % prod)
             print("percentage processed : %s" % percent)
-
-
