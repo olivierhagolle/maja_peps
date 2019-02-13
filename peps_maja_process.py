@@ -28,7 +28,23 @@ class OptionParser (optparse.OptionParser):
             self.error("%s option not supplied" % option)
 
 ###########################################################################
-
+def parse_prod(log_prod):
+    """ checks production status """
+    status=True
+    with open(log_prod) as data_file:
+        try:
+            data = json.load(data_file)
+        except ValueError:
+            return status
+    if 'ErrorCode' in data:
+        print(">>>> unable to start processing %s "%log_prod)
+        if data['ErrorMessage']=='Unauthorized':
+            print("\t please check your password file\n")
+        else:
+            print("\t %s"%data['ErrorMessage'])
+        status=False
+    return status
+    
 
 def parse_catalog(search_json_file):
     """ parses the results of catalog request"""
@@ -268,3 +284,5 @@ if confirm == "yes":
                 print("*** submission of maja processing of %s ***" % prod)
                 print (start_maja)
                 os.system(start_maja)
+                #check process was correctly launched
+                prod_ok=parse_prod(log_prod)
