@@ -41,7 +41,7 @@ def parse_update(update_prod):
         for ligne in ftmp.readlines():
             if ligne.find("wps:Reference") > 0:
                 json_url = ligne.split("href")[1].split('"')[1]
-        if json_url is None:
+        if json_url is not None:
             return json_url
         else:
             print("%s only contains :" % update_prod)
