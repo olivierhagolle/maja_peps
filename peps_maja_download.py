@@ -30,18 +30,26 @@ def parse_launch_feedback(log_prod):
             if ligne.find("statusLocation") > 0:
                 status_url = ligne.split("statusLocation")[1].split('"')[1]
                 wpsId = status_url.split("pywps-")[1].split(".xml")[0]
-    return status_url,wpsId
-    
+    return status_url, wpsId
+
 ###########################################################################
+
+
 def parse_update(update_prod):
     """ Gets update """
     with open(update_prod) as ftmp:
         for ligne in ftmp.readlines():
             if ligne.find("wps:Reference") > 0:
-                json_url = ligne.split("href")[1].split('"')[1]	
-    return json_url
-        
+                json_url = ligne.split("href")[1].split('"')[1]
+        if json_url is not None:
+            return json_url
+        else:
+            print("%s only contains :" % update_prod)
+            print(ftmp.readlines())
+
 ###########################################################################
+
+
 def parse_status(stat_prod):
     """ checks if processing is completed """
     status = "computing"
@@ -126,27 +134,27 @@ for ligne in lignes:
 for prod in prod_list:
     # get status file
     log_prod = os.path.join(options.write_dir, str(prod + '.log'))
-    status_url,wpsId = parse_launch_feedback(log_prod)
+    status_url, wpsId = parse_launch_feedback(log_prod)
     print("wpsId: ", wpsId)
-    
+
     #-- Charlotte add
     update_prod = os.path.join(options.write_dir, str('update_' + prod + '.txt'))
     update_status = 'curl -o %s -k -u  "%s:%s" %s' % (
-		update_prod, email, passwd, status_url)
+        update_prod, email, passwd, status_url)
     print(update_status)
     os.system(update_status)
-    
+
     json_url = parse_update(update_prod)
     stat_prod = os.path.join(options.write_dir, str(prod + '.stat'))
     get_status = 'curl -o %s -k -u  "%s:%s" %s' % (
-		stat_prod, email, passwd, json_url)
+        stat_prod, email, passwd, json_url)
     print(get_status)
     os.system(get_status)
     (percent, status, download_url, L2A_name) = parse_status(stat_prod)
-    
+
     #~ stat_prod = os.path.join(options.write_dir, str(prod + '.stat'))
     #~ get_status = 'curl -o %s -k -u  "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=\[wps_id=%s\]"' % (
-        #~ stat_prod, email, passwd, wpsId)
+    #~ stat_prod, email, passwd, wpsId)
     #~ print(get_status)
     #~ os.system(get_status)
 
