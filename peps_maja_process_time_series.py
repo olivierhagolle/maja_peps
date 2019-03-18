@@ -6,6 +6,7 @@ import os
 import os.path
 import optparse
 import sys
+import requests
 from datetime import date
 
 ###########################################################################
@@ -168,7 +169,13 @@ else:
     url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s&completionDate=%s;tileid=%s&status=true&storeExecuteResponse=true" % (
         peps, start_date, end_date, options.tile)
 
-start_maja = 'curl -o %s -k -u "%s:%s" "%s"' % (options.logName, email, passwd, url)
-print(start_maja)
+
+print(url)
 if not options.no_download:
-    os.system(start_maja)
+    req = requests.get(url, auth=(email, passwd))
+    with open("Full_Maja.log", "w") as f:
+        f.write(req.text.encode('utf-8'))
+    if req.status_code == 200:
+        print("Request OK")
+    else:
+        print("Wrong request status {}".format(str(req.status_code)))
