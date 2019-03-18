@@ -82,23 +82,15 @@ if len(sys.argv) == 1:
     print('      ' + sys.argv[0] + ' [options]')
     print("     Aide : ", prog, " --help")
     print("        ou : ", prog, " -h")
-    print("example 1 : python %s -l 'Toulouse' -a peps.txt -d 2016-12-06 -f 2017-02-01 -c S2ST" %
+    print("example  : python %s -a peps.txt -t 31TCJ -d 2018-01-01 -f 2018-03-01 -w TEST_MAJA" %
           sys.argv[0])
-    print("example 2 : python %s --lon 1 --lat 44 -a peps.txt -d 2015-11-01 -f 2015-12-01 -c S2" %
-          sys.argv[0])
-    print("example 3 : python %s --lonmin 1 --lonmax 2 --latmin 43 --latmax 44 -a peps.txt -d 2015-11-01 -f 2015-12-01 -c S2" %
-          sys.argv[0])
-    print("example 4 : python %s -l 'Toulouse' -a peps.txt -c SpotWorldHeritage -p SPOT4 -d 2005-11-01 -f 2006-12-01" %
-          sys.argv[0])
-    print("example 5 : python %s -c S1 -p GRD -l 'Toulouse' -a peps.txt -d 2015-11-01 -f 2015-12-01" %
+    print("example  : python %s -a peps.txt -t 31TCJ -o 51 -d 2018-01-01 -f 2018-03-01 -w TEST_MAJA" %
           sys.argv[0])
     sys.exit(-1)
 else:
     usage = "usage: %prog [options] "
     parser = OptionParser(usage=usage)
 
-    parser.add_option("-l", "--location", dest="location", action="store", type="string",
-                      help="town name (pick one which is not too frequent to avoid confusions)", default=None)
     parser.add_option("-a", "--auth", dest="auth", action="store", type="string",
                       help="Peps account and password file")
     parser.add_option("-w", "--write_dir", dest="write_dir", action="store", type="string",
@@ -113,7 +105,8 @@ else:
                       help="Orbit Path number", default=None)
     parser.add_option("-f", "--end_date", dest="end_date", action="store", type="string",
                       help="end date, fmt('2015-12-23')", default='9999-01-01')
-
+    parser.add_option("-g", "--log", dest="logName", action="store", type="string",
+                      help="log file name ", default='Full_Maja.log')
     parser.add_option("--json", dest="search_json_file", action="store", type="string",
                       help="Output search JSON filename", default=None)
     parser.add_option("--windows", dest="windows", action="store_true",
@@ -156,11 +149,12 @@ except:
 if os.path.exists(options.search_json_file):
     os.remove(options.search_json_file)
 
-logname = "%s_%s_%s.log" % (options.tile, start_date, end_date)
 
 # =====================
 # Start Maja processing
 # =====================
+
+peps = "http://peps.cnes.fr/resto/wps"
 
 
 if options.write_dir is None:
@@ -168,13 +162,13 @@ if options.write_dir is None:
 
 
 if options.orbit is not None:
-    url = "http://peps.cnes.fr/resto/wps?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s;completionDate=%s;tileid=%s;relativeOrbitNumber=%s&status=true&storeExecuteResponse=true" % (
-        start_date, end_date, options.tile, options.orbit)
+    url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s;completionDate=%s;tileid=%s;relativeOrbitNumber=%s&status=true&storeExecuteResponse=true" % (
+        peps, start_date, end_date, options.tile, options.orbit)
 else:
-    url = "http://peps.cnes.fr/resto/wps?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s;completionDate=%s;tileid=%s&status=true&storeExecuteResponse=true" % (
-        start_date, end_date, options.tile)
+    url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s&completionDate=%s;tileid=%s&status=true&storeExecuteResponse=true" % (
+        peps, start_date, end_date, options.tile)
 
-start_maja = 'curl -o %s -k -u "%s:%s" "%s"' % (logname, email, passwd, url)
+start_maja = 'curl -o %s -k -u "%s:%s" "%s"' % (options.logName, email, passwd, url)
 print(start_maja)
 if not options.no_download:
     os.system(start_maja)
