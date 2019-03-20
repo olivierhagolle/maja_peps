@@ -85,7 +85,7 @@ if len(sys.argv) == 1:
     print("        ou : ", prog, " -h")
     print("example  : python %s -a peps.txt -t 31TCJ -d 2018-01-01 -f 2018-03-01 -w TEST_MAJA" %
           sys.argv[0])
-    print("example  : python %s -a peps.txt -t 31TCJ -o 51 -d 2018-01-01 -f 2018-03-01 -w TEST_MAJA" %
+    print("example  : python %s -a peps.txt -t 31TCJ -o 51 -g Full_MAJA_31TCJ_51_2019.log -d 2018-01-01 -f 2018-03-01" %
           sys.argv[0])
     sys.exit(-1)
 else:
@@ -94,8 +94,6 @@ else:
 
     parser.add_option("-a", "--auth", dest="auth", action="store", type="string",
                       help="Peps account and password file")
-    parser.add_option("-w", "--write_dir", dest="write_dir", action="store", type="string",
-                      help="Path where the products should be downloaded", default='.')
     parser.add_option("-n", "--no_download", dest="no_download", action="store_true",
                       help="Do not download products, just print curl command", default=False)
     parser.add_option("-d", "--start_date", dest="start_date", action="store", type="string",
@@ -110,8 +108,6 @@ else:
                       help="log file name ", default='Full_Maja.log')
     parser.add_option("--json", dest="search_json_file", action="store", type="string",
                       help="Output search JSON filename", default=None)
-    parser.add_option("--windows", dest="windows", action="store_true",
-                      help="For windows usage", default=False)
 
     (options, args) = parser.parse_args()
     parser.check_required("-a")
@@ -158,10 +154,6 @@ if os.path.exists(options.search_json_file):
 peps = "http://peps.cnes.fr/resto/wps"
 
 
-if options.write_dir is None:
-    options.write_dir = os.getcwd()
-
-
 if options.orbit is not None:
     url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s;completionDate=%s;tileid=%s;relativeOrbitNumber=%s&status=true&storeExecuteResponse=true" % (
         peps, start_date, end_date, options.tile, options.orbit)
@@ -173,7 +165,7 @@ else:
 print(url)
 if not options.no_download:
     req = requests.get(url, auth=(email, passwd))
-    with open("Full_Maja.log", "w") as f:
+    with open(options.logName, "w") as f:
         f.write(req.text.encode('utf-8'))
     if req.status_code == 200:
         print("Request OK")
