@@ -9,6 +9,7 @@ import os.path
 import optparse
 import sys
 
+
 ###########################################################################
 
 
@@ -137,7 +138,7 @@ for prod in prod_list:
     status_url, wpsId = parse_launch_feedback(log_prod)
     print("wpsId: ", wpsId)
 
-    #-- Charlotte add
+    # -- Charlotte add
     update_prod = os.path.join(options.write_dir, str('update_' + prod + '.txt'))
     update_status = 'curl -o %s -k -u  "%s:%s" %s' % (
         update_prod, email, passwd, status_url)
@@ -152,10 +153,10 @@ for prod in prod_list:
     os.system(get_status)
     (percent, status, download_url, L2A_name) = parse_status(stat_prod)
 
-    #~ stat_prod = os.path.join(options.write_dir, str(prod + '.stat'))
-    #~ get_status = 'curl -o %s -k -u  "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=\[wps_id=%s\]"' % (
-    #~ stat_prod, email, passwd, wpsId)
-    #~ print(get_status)
+    # ~ stat_prod = os.path.join(options.write_dir, str(prod + '.stat'))
+    # ~ get_status = 'curl -o %s -k -u  "%s:%s" "https://peps.cnes.fr/resto/wps?service=WPS&request=execute&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=\[wps_id=%s\]"' % (
+    # ~ stat_prod, email, passwd, wpsId)
+    # ~ print(get_status)
     #~ os.system(get_status)
 
     # Check status
