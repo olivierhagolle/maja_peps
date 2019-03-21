@@ -29,7 +29,7 @@ This script will ask PEPS to process z continuous time series (from a begin date
 
 It will submit Maja processing for the Sentinel-2 L1C products acquired in 2017 above Toulouse (31TCJ tile). A log file is issued which is necessary to check the completion and download the products with full_maja_download.py. If you want to start several tiles in paralllel, remember to specify a different logfile, or you will lose the information to retrive the data. If you have done such an error (I know it will happen ;) ), it is still possible to retrieve the results from the PEPS interface after having logged.
 
-The option `-a peps.txt` provides the authentification information. 
+The option `-a peps.txt` provides the authentification information (see below  for its format)
 
 *Specifying the relative orbit*
 
@@ -49,7 +49,7 @@ The syntax of full_maja_download.py is even simpler, only the authentification i
 
 You may also specify an output directory for downloading the datasets.
 
-The processing of the time series with MAJA can't be done in parallel, as date D+1 needs the result of date D to be processed. It takes less than one hour to generate the first product of a time series, which is based on a complex initiatlisation procedure, and then around 25 minutes per date to process. To save time and space, the dates with more than 90% of clouds are not issued.
+The processing of the time series with MAJA can't be done in parallel, as date D+1 needs the result of date D to be processed. It takes less than one hour to generate the first product of a time series, which is based on a complex initiatlisation procedure, and then around 25 minutes per date to process. To save time and space, the dates with more than 90% of clouds are not issued. The products are only made available at the end, when everything is produced, so if you are noat patient, you will have to start  the command line several times.
 
 
 
