@@ -25,7 +25,6 @@ This code relies on python (it should work with python 2 and 3). It was developp
 
 This script will ask PEPS to process z continuous time series (from a begin date to an end date). It is currently limited to a maximum of one year and a minimum of two months. You will have to start a different command line for each tile you want to process. Because of issues with Sentinel-2 L1C products before the 1st of April 2016, full_maja processing must start after the 1st of April 2016. The command line is very simple :
 
-- `python ./full_maja_process.py  -t 31TCJ -a peps.txt -d 2017-01-01 -f 2018-01-01 -g 31TCJ_20170101.log` 
 
 It will submit Maja processing for the Sentinel-2 L1C products acquired in 2017 above Toulouse (31TCJ tile). A log file is issued which is necessary to check the completion and download the products with full_maja_download.py. If you want to start several tiles in paralllel, remember to specify a different logfile, or you will lose the information to retrive the data. If you have done such an error (I know it will happen ;) ), it is still possible to retrieve the results from the PEPS interface after having logged.
 
@@ -35,17 +34,17 @@ The option `-a peps.txt` provides the authentification information (see below  f
 
 Sometimes, a given tile is fully covered by one orbit, and only partially by another one. To save processing time and space, you can select to process only one orbut by specifying the orbit obtion with -o option.
 
-- `python ./full_maja_process.py  -t 31TCJ -o 51 -a peps.txt -d 2017-01-01 -f 2018-01-01 -g 31TCJ_20170101.log` 
+- `python ./full_maja_process.py  -t 31TCJ -o 51 -a peps.txt -d 2017-01-01 -f 2018-01-01 -l 31TCJ_20170101.log` 
 
 It will only process the data from relative orbit 51. But is you want to process the two orbits ofor one tile, it is better to specify nothing than launching two separate processings with each orbit 
 
 ### full_maja_download
 
- - ` python full_maja_download.py -a peps.txt -g 31TCJ_20170101.log`
+ - ` python full_maja_download.py -a peps.txt -l 31TCJ_20170101.log`
  
-The syntax of full_maja_download.py is even simpler, only the authentification information and the  log file are necessary.
+The syntax of full_maja_download.py is even simpler, only the authentification information and the log file are necessary.
 
- - ` python full_maja_download.py -a peps.txt -g 31TCJ_20170101.log -w /path/to/31TCJ`
+ - ` python full_maja_download.py -a peps.txt -l 31TCJ_20170101.log -w /path/to/31TCJ`
 
 You may also specify an output directory for downloading the datasets.
 
