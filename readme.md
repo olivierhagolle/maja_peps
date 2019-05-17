@@ -36,17 +36,17 @@ The option `-a peps.txt` provides the authentification information (see below  f
 
 Sometimes, a given tile is fully covered by one orbit, and only partially by another one. To save processing time and space, you can select to process only one orbut by specifying the orbit obtion with -o option.
 
-- `python ./full_maja_process.py  -t 31TCJ -o 51 -a peps.txt -d 2017-01-01 -f 2018-01-01 -l 31TCJ_20170101.log` 
+- `python ./full_maja_process.py  -t 31TCJ -o 51 -a peps.txt -d 2017-01-01 -f 2018-01-01 -g 31TCJ_20170101.log` 
 
 It will only process the data from relative orbit 51. But is you want to process the two orbits ofor one tile, it is better to specify nothing than launching two separate processings with each orbit 
 
 ### full_maja_download
 
- - ` python full_maja_download.py -a peps.txt -l 31TCJ_20170101.log`
+ - ` python full_maja_download.py -a peps.txt -g 31TCJ_20170101.log`
  
 The syntax of full_maja_download.py is even simpler, only the authentification information and the log file are necessary.
 
- - ` python full_maja_download.py -a peps.txt -l 31TCJ_20170101.log -w /path/to/31TCJ`
+ - ` python full_maja_download.py -a peps.txt -g 31TCJ_20170101.log -w /path/to/31TCJ`
 
 You may also specify an output directory for downloading the datasets.
 
