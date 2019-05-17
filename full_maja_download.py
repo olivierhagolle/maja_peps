@@ -28,14 +28,14 @@ class OptionParser (optparse.OptionParser):
 
 
 def downloadFile(url, fileName, email, password):
-    r = requests.get(url, auth=(email, passwd), stream=True)
+    r = requests.get(url, auth=(email, passwd), stream=True, verify=False)
     with open(fileName, 'wb') as f:
         shutil.copyfileobj(r.raw, f)
     return
 
 
 def getURL(url, fileName, email, passwd):
-    req = requests.get(url, auth=(email, passwd))
+    req = requests.get(url, auth=(email, passwd), verify=False)
     with open(fileName, "w") as f:
         f.write(req.text.encode('utf-8'))
         if req.status_code == 200:
@@ -49,7 +49,7 @@ def getURL(url, fileName, email, passwd):
 ###########################################################################
 
 
-def parse_json(json_file):
+def parse_json(json_file, write_dir):
     with open(json_file) as data_file:
         data = json.load(data_file)
     status = data["USER_INFO"]["job_status"]
@@ -63,7 +63,7 @@ def parse_json(json_file):
                 print("%s was too cloudy" % L2AName)
             else:
                 print("downloading %s" % L2AName)
-                downloadFile(urlL2A, L2AName, email, passwd)
+                downloadFile(urlL2A, "%s/%s"%(write_dir,L2AName), email, passwd)
     # processing still on-going
     elif status == "STALLED":
         progress = data["USER_INFO"]["process"]
@@ -178,4 +178,5 @@ print urlJSON
 JSONFileName = options.logName.replace('log', 'json')
 getURL(urlJSON, JSONFileName, email, passwd)
 
-parse_json(JSONFileName)
+# check and, if finished, download products
+parse_json(JSONFileName,options.write_dir)
