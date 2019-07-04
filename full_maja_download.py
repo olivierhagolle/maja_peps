@@ -115,6 +115,7 @@ else:
 
     if options.write_dir is None:
         options.write_dir = os.getcwd()
+print("---------------------------------------------------------------------------")
 
 
 # ====================
@@ -140,6 +141,7 @@ try:
         urlStatus = None
         for ligne in lignes:
             if ligne.startswith("<wps:ExecuteResponse"):
+                wpsId = ligne.split("pywps-")[1].split(".xml")[0]
                 urlStatus = ligne.split('statusLocation="')[1].split('">')[0]
         if urlStatus is None:
             print("url for production status not found in logName %s" % options.logName)
@@ -148,12 +150,17 @@ except IOError:
     print("error with logName file provided as input or as default parameter")
     sys.exit(-3)
 
-# get urlStatus:
-print urlStatus
-
-
 statusFileName = options.logName.replace('log', 'stat')
 getURL(urlStatus, statusFileName, email, passwd)
+
+peps = "http://peps-vizo.cnes.fr:8081/cgi-bin/pywps.cgi"
+#peps = "http://peps.cnes.fr/resto/wps"
+
+url = "{}?request=execute&service=WPS&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=wps_id={}&status=false&storeExecuteResponse=false".format(peps, wpsId)
+
+# Update log files 
+print("Updating status files: {}".format(url))
+req = requests.get(url)
 
 
 # get json file from urlStatus
@@ -174,9 +181,10 @@ except IOError:
     sys.exit(-3)
 
 # get urlJSON:
-print urlJSON
+print("Execution report: {}".format(urlJSON))
 JSONFileName = options.logName.replace('log', 'json')
 getURL(urlJSON, JSONFileName, email, passwd)
 
 # check and, if finished, download products
 parse_json(JSONFileName,options.write_dir)
+print("---------------------------------------------------------------------------")
