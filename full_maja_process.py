@@ -7,7 +7,8 @@ import os.path
 import optparse
 import sys
 import requests
-from datetime import date
+import re
+from datetime import date, datetime
 
 ###########################################################################
 
@@ -73,6 +74,40 @@ def parse_catalog(search_json_file):
 
     return(prod, download_dict, storage_dict, size_dict)
 
+###########################################################################
+def check_params(start_date, stop_date, tileid, orbit=None):
+    """
+    Check the parameters
+    :param start_date: Starting Date, format : str(XXXX-XX-XX)
+    :type start_date: str
+    :param stop_date: End date, format : str(XXXX-XX-XX)
+    :type stop_date: str
+    :param tileid: MGRS tile ID
+    :type tileid: str
+    :param orbit: relative orbit number
+    :type orbit: int
+    """
+    # Check dates
+    start_date = start_date.split("-")
+    stop_date = stop_date.split("-")
+    start_date = datetime(int(start_date[0]), int(start_date[1]), int(start_date[2]))
+    stop_date = datetime(int(stop_date[0]), int(stop_date[1]), int(stop_date[2]))
+    
+    days = (stop_date - start_date).days
+    
+    if days < 55 or days > 366:
+        raise ValueError("The time interval must be between 2 months and 1 year")
+    
+    # Check orbit number
+    if orbit :
+        if orbit > 143 or orbit < 1:
+            raise ValueError("The relative orbit number must be between 1 and 143")
+    
+    # Check tile regex
+    re_tile = re.compile("^[0-6][0-9][A-Za-z]([A-Za-z]){0,2}%?$")
+    if not re_tile.match(tileid):
+        raise ValueError("The tile ID is in the wrong format")
+    
 
 # ===================== MAIN
 # ==================
@@ -129,6 +164,9 @@ if options.start_date is not None:
 if options.tile.startswith('T'):
     options.tile = options.tile[1:]
 
+# Check params
+check_params(start_date, end_date, options.tile, options.orbit)
+
 # ====================
 # read authentification file
 # ====================
@@ -150,8 +188,9 @@ if os.path.exists(options.search_json_file):
 # =====================
 # Start Maja processing
 # =====================
-
-peps = "http://peps.cnes.fr/resto/wps"
+# Testing adress
+peps = "http://peps-vizo.cnes.fr:8081/cgi-bin/pywps.cgi"
+#peps = "http://peps.cnes.fr/resto/wps"
 
 
 if options.orbit is not None:
