@@ -197,16 +197,24 @@ if options.orbit is not None:
     url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s;completionDate=%s;tileid=%s;relativeOrbitNumber=%s&status=true&storeExecuteResponse=true" % (
         peps, start_date, end_date, options.tile, options.orbit)
 else:
-    url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s&completionDate=%s;tileid=%s&status=true&storeExecuteResponse=true" % (
+    url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s;completionDate=%s;tileid=%s&status=true&storeExecuteResponse=true" % (
         peps, start_date, end_date, options.tile)
 
 
 print(url)
 if not options.no_download:
-    req = requests.get(url, auth=(email, passwd))
+    #req = requests.get(url, auth=(email, passwd))
+    req = requests.get(url)
     with open(options.logName, "w") as f:
         f.write(req.text.encode('utf-8'))
+    print("---------------------------------------------------------------------------")
     if req.status_code == 200:
-        print("Request OK")
+        if "Process FULL_MAJA accepted" in req.text.encode('utf-8'):
+            print("Request OK !")
+            print("To check completion and download results:")
+            print("     python full_maja_download.py -a peps.txt -g {}".format(options.logName))
+        else:
+            print("Something is wrong : please check {} file".format(options.logName))
     else:
         print("Wrong request status {}".format(str(req.status_code)))
+    print("---------------------------------------------------------------------------")
