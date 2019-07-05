@@ -61,9 +61,15 @@ def parse_json(json_file, write_dir):
             L2AName = urlL2A.split('/')[-1]
             if L2AName.find('NOVALD') >= 0:
                 print("%s was too cloudy" % L2AName)
+            elif os.path.isfile(os.path.join(write_dir, L2AName)):
+                print("skipping {}: already on disk".format(L2AName))
             else:
                 print("downloading %s" % L2AName)
                 downloadFile(urlL2A, "%s/%s"%(write_dir,L2AName), email, passwd)
+        n_unproc =  int(data["USER_INFO"]["unprocessed"])
+        if n_unproc > 0:
+            print("\nWarning: {:d} products have not been processed".format(n_unproc))
+            print("For more information, please check {}".format(json_file))
     # processing still on-going
     elif status == "STALLED":
         progress = data["USER_INFO"]["process"]
@@ -153,14 +159,13 @@ except IOError:
 statusFileName = options.logName.replace('log', 'stat')
 getURL(urlStatus, statusFileName, email, passwd)
 
-peps = "http://peps-vizo.cnes.fr:8081/cgi-bin/pywps.cgi"
-#peps = "http://peps.cnes.fr/resto/wps"
+peps = "http://peps.cnes.fr/resto/wps"
 
 url = "{}?request=execute&service=WPS&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=wps_id={}&status=false&storeExecuteResponse=false".format(peps, wpsId)
 
 # Update log files 
 print("Updating status files: {}".format(url))
-req = requests.get(url)
+req = requests.get(url, auth=(email, passwd))
 
 
 # get json file from urlStatus

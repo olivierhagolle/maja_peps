@@ -188,9 +188,7 @@ if os.path.exists(options.search_json_file):
 # =====================
 # Start Maja processing
 # =====================
-# Testing adress
-peps = "http://peps-vizo.cnes.fr:8081/cgi-bin/pywps.cgi"
-#peps = "http://peps.cnes.fr/resto/wps"
+peps = "http://peps.cnes.fr/resto/wps"
 
 
 if options.orbit is not None:
@@ -203,8 +201,7 @@ else:
 
 print(url)
 if not options.no_download:
-    #req = requests.get(url, auth=(email, passwd))
-    req = requests.get(url)
+    req = requests.get(url, auth=(email, passwd))
     with open(options.logName, "w") as f:
         f.write(req.text.encode('utf-8'))
     print("---------------------------------------------------------------------------")
