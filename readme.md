@@ -21,11 +21,13 @@ This code relies on python (it should work with python 2 and 3). It was developp
 
 ## Examples
 
-Full_Maja processing on peps is still an alpha version. We need an approval from a manager to open it to all users.  Meanwhile, go to the **old version** section.
+Full_Maja processing on peps is still an alpha version. We need an approval from a manager to open it to all users.  Meanwhile, go to the **old version** section. Using the on-demand MAJA process, two python programs are needed, one to submit the processing, and one to check completion, and to retrive the data it it is finished. 
  
 ### full_maja_process
 
-This script will ask PEPS to process a continuous time series (from a begin date to an end date). It is currently limited to a maximum of one year and a minimum of two months. You will have to start a different command line for each tile you want to process. Because of issues with Sentinel-2 L1C products before the 1st of April 2016, full_maja processing must start after the 1st of April 2016. The command line is very simple :
+This script will ask PEPS to process a continuous time series (from a begin date to an end date). It is currently limited to a maximum of one year and a minimum of two months, it is also limited to the processing of 10 tiles in parallel  for all the users in the world. If this limit is reached, the process will be pending untin one of the processed ends. You will have to start a different command line for each tile you want to process. Because of issues with Sentinel-2 L1C products before the 1st of April 2016, full_maja processing must start after the 1st of April 2016. 
+
+The command line is very simple :
 
  `python ./full_maja_process.py  -t 31TCJ -a peps.txt -d 2017-07-01 -f 2018-01-01 -g 31TCJ_20170101.log` 
 
@@ -53,7 +55,7 @@ The syntax of full_maja_download.py is even simpler, only the authentification i
 
 You may also specify an output directory for downloading the datasets.
 
-The processing of the time series with MAJA can't be done in parallel, as date D+1 needs the result of date D to be processed. It takes less than one hour to generate the first product of a time series, which is based on a complex initiatlisation procedure, and then around 25 minutes per date to process. To save time and space, the dates with more than 90% of clouds are not issued. The products are only made available at the end, when everything is produced, so if you are noat patient, you will have to start  the command line several times.
+The processing of the time series with MAJA can't be done in parallel, as date D+1 needs the result of date D to be processed. It takes less than one hour to generate the first product of a time series, which is based on a complex initiatlisation procedure, and then around 25 minutes per date to process. To save time and space, the dates with more than 90% of clouds are not issued. The products are only made available at the end, when everything is produced, so if you are noat patient, you will have to start  the command line several times, but there is no need to check it every minute, givent the expected amount of time needed. The percentages provided in the log file are very exagerated, they are just usefull for yo to see that progress is being made in the processing.
 
 ### processing capacity
 Two problem may cause the on demand processing with MAJA to be kept pending for a while :
