@@ -25,20 +25,23 @@ Full_Maja processing on peps is still an alpha version. We need an approval from
  
 ### full_maja_process
 
-This script will ask PEPS to process z continuous time series (from a begin date to an end date). It is currently limited to a maximum of one year and a minimum of two months. You will have to start a different command line for each tile you want to process. Because of issues with Sentinel-2 L1C products before the 1st of April 2016, full_maja processing must start after the 1st of April 2016. The command line is very simple :
+This script will ask PEPS to process a continuous time series (from a begin date to an end date). It is currently limited to a maximum of one year and a minimum of two months. You will have to start a different command line for each tile you want to process. Because of issues with Sentinel-2 L1C products before the 1st of April 2016, full_maja processing must start after the 1st of April 2016. The command line is very simple :
 
+ `python ./full_maja_process.py  -t 31TCJ -a peps.txt -d 2017-07-01 -f 2018-01-01 -g 31TCJ_20170101.log` 
 
-It will submit Maja processing for the Sentinel-2 L1C products acquired in 2017 above Toulouse (31TCJ tile). A log file is issued which is necessary to check the completion and download the products with full_maja_download.py. If you want to start several tiles in paralllel, remember to specify a different logfile, or you will lose the information to retrive the data. If you have done such an error (I know it will happen ;) ), it is still possible to retrieve the results from the PEPS interface after having logged.
+It will submit Maja processing for the Sentinel-2 L1C products acquired in the last 6 months of 2017 above Toulouse (31TCJ tile). A log file is issued which is necessary to check the completion and download the products with full_maja_download.py. If you want to start several tiles in parallel, remember to specify a different logfile, or you will lose the information to retrieve the data. If you have done such an error (I know it will happen ;) ), it is still possible to retrieve the results from the PEPS interface after having logged.
 
-The option `-a peps.txt` provides the authentification information (see below  for its format)
+The option `-a peps.txt` provides the authentification information (see below for its format)
 
 *Specifying the relative orbit*
 
 Sometimes, a given tile is fully covered by one orbit, and only partially by another one. To save processing time and space, you can select to process only one orbut by specifying the orbit obtion with -o option.
 
-- `python ./full_maja_process.py  -t 31TCJ -o 51 -a peps.txt -d 2017-01-01 -f 2018-01-01 -g 31TCJ_20170101.log` 
+- `python ./full_maja_process.py  -t 31TCJ -o 51 -a peps.txt -d 2017-07-01 -f 2018-01-01 -g 31TCJ_20170101.log` 
 
-It will only process the data from relative orbit 51. But is you want to process the two orbits ofor one tile, it is better to specify nothing than launching two separate processings with each orbit 
+It will only process the data from relative orbit 51. But if you want to process the two orbits for one tile, it is better to specify nothing than launching two separate processings with each orbit.
+
+
 
 ### full_maja_download
 
@@ -52,6 +55,11 @@ You may also specify an output directory for downloading the datasets.
 
 The processing of the time series with MAJA can't be done in parallel, as date D+1 needs the result of date D to be processed. It takes less than one hour to generate the first product of a time series, which is based on a complex initiatlisation procedure, and then around 25 minutes per date to process. To save time and space, the dates with more than 90% of clouds are not issued. The products are only made available at the end, when everything is produced, so if you are noat patient, you will have to start  the command line several times.
 
+### processing capacity
+Two problem may cause the on demand processing with MAJA to be kept pending for a while :
+- our processor uses the High Performance Computing center at CNES,named HAL, which is a powerful but busy center. If it is too busy, you will have to wait until processors get available. MAJA will be pending.
+
+- It also relies on a robot (HPSS) that downloads the Sentinel-2 data stored on tapes. When HPSS is overloaded, it happens that some products are not provided in time and not processed resulting in data gaps in the time series. To prevent that we have limited the processing capacity to 10 tiles in parallel, for all users in the world. As a result, the process could be "pending" for a while too. It will mean our on-demand processing facility is a success ;) In case some data gaps occur because of the HPSS is overloaded, the missing products will be counted and listed.
 
 
 ## Old version
