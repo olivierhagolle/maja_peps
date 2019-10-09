@@ -90,6 +90,9 @@ def check_params(start_date, stop_date, tileid, orbit=None):
     # Check dates
     start_date = start_date.split("-")
     stop_date = stop_date.split("-")
+    if len(start_date[0]) != 4 or len(start_date[1]) != 2 or len(start_date[2]) != 2 or len(stop_date[0]) != 4 or len(stop_date[1]) != 2 or len(stop_date[2]) != 2:
+        raise ValueError("The date format is incorrect")
+
     start_date = datetime(int(start_date[0]), int(start_date[1]), int(start_date[2]))
     stop_date = datetime(int(stop_date[0]), int(stop_date[1]), int(stop_date[2]))
     
@@ -189,7 +192,6 @@ if os.path.exists(options.search_json_file):
 # Start Maja processing
 # =====================
 peps = "http://peps.cnes.fr/resto/wps"
-
 
 if options.orbit is not None:
     url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s;completionDate=%s;tileid=%s;relativeOrbitNumber=%s&status=true&storeExecuteResponse=true" % (
