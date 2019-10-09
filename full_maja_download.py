@@ -78,16 +78,11 @@ def parse_json(json_file, write_dir):
         print("Progress indicates %s, but the percentage is really exagerated" % progress)
 
     # processing finished with error
-    elif status == "ERROR":
-        print("error")
-        print(data["USER_INFO"]["logs"])
+    elif status == "ERROR" or status == "CANCELED":
         urlLog = data["USER_INFO"]["logs"][0]
+        message = data["USER_INFO"]["message"]
         finalLog = json_file.replace(".json", ".finalLog")
-        #print logfilen
-        getURL(urlLog, finalLog, email, passwd)
-        with open(finalLog, "r") as f:
-            for line in f.readlines():
-                print(line.strip())
+        print(message)
 
     return
 
