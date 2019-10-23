@@ -7,7 +7,8 @@ import os.path
 import optparse
 import sys
 import requests
-from datetime import date
+import re
+from datetime import date, datetime
 
 ###########################################################################
 
@@ -73,6 +74,43 @@ def parse_catalog(search_json_file):
 
     return(prod, download_dict, storage_dict, size_dict)
 
+###########################################################################
+def check_params(start_date, stop_date, tileid, orbit=None):
+    """
+    Check the parameters
+    :param start_date: Starting Date, format : str(XXXX-XX-XX)
+    :type start_date: str
+    :param stop_date: End date, format : str(XXXX-XX-XX)
+    :type stop_date: str
+    :param tileid: MGRS tile ID
+    :type tileid: str
+    :param orbit: relative orbit number
+    :type orbit: int
+    """
+    # Check dates
+    start_date = start_date.split("-")
+    stop_date = stop_date.split("-")
+    if len(start_date[0]) != 4 or len(start_date[1]) != 2 or len(start_date[2]) != 2 or len(stop_date[0]) != 4 or len(stop_date[1]) != 2 or len(stop_date[2]) != 2:
+        raise ValueError("The date format is incorrect")
+
+    start_date = datetime(int(start_date[0]), int(start_date[1]), int(start_date[2]))
+    stop_date = datetime(int(stop_date[0]), int(stop_date[1]), int(stop_date[2]))
+    
+    days = (stop_date - start_date).days
+    
+    if days < 55 or days > 366:
+        raise ValueError("The time interval must be between 2 months and 1 year")
+    
+    # Check orbit number
+    if orbit :
+        if orbit > 143 or orbit < 1:
+            raise ValueError("The relative orbit number must be between 1 and 143")
+    
+    # Check tile regex
+    re_tile = re.compile("^[0-6][0-9][A-Za-z]([A-Za-z]){0,2}%?$")
+    if not re_tile.match(tileid):
+        raise ValueError("The tile ID is in the wrong format")
+    
 
 # ===================== MAIN
 # ==================
@@ -129,6 +167,9 @@ if options.start_date is not None:
 if options.tile.startswith('T'):
     options.tile = options.tile[1:]
 
+# Check params
+check_params(start_date, end_date, options.tile, options.orbit)
+
 # ====================
 # read authentification file
 # ====================
@@ -150,15 +191,13 @@ if os.path.exists(options.search_json_file):
 # =====================
 # Start Maja processing
 # =====================
-
 peps = "http://peps.cnes.fr/resto/wps"
-
 
 if options.orbit is not None:
     url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s;completionDate=%s;tileid=%s;relativeOrbitNumber=%s&status=true&storeExecuteResponse=true" % (
         peps, start_date, end_date, options.tile, options.orbit)
 else:
-    url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s&completionDate=%s;tileid=%s&status=true&storeExecuteResponse=true" % (
+    url = "%s?request=execute&service=WPS&version=1.0.0&identifier=FULL_MAJA&datainputs=startDate=%s;completionDate=%s;tileid=%s&status=true&storeExecuteResponse=true" % (
         peps, start_date, end_date, options.tile)
 
 
@@ -167,7 +206,14 @@ if not options.no_download:
     req = requests.get(url, auth=(email, passwd))
     with open(options.logName, "w") as f:
         f.write(req.text.encode('utf-8'))
+    print("---------------------------------------------------------------------------")
     if req.status_code == 200:
-        print("Request OK")
+        if "Process FULL_MAJA accepted" in req.text.encode('utf-8'):
+            print("Request OK !")
+            print("To check completion and download results:")
+            print("     python full_maja_download.py -a peps.txt -g {}".format(options.logName))
+        else:
+            print("Something is wrong : please check {} file".format(options.logName))
     else:
         print("Wrong request status {}".format(str(req.status_code)))
+    print("---------------------------------------------------------------------------")
