@@ -1,7 +1,7 @@
 
 
 # peps_maja
-PEPS is the French Sentinel collaborative ground segment: https://peps.cnes.fr. PEPS is mirroring all the Sentinel data provided by ESA, and is providing a simplified access. It also implements a few processors among which [MAJA atmospheric correction processor](http://www.cesbio.ups-tlse.fr/multitemp/?p=6203). This repository contains two scripts to submit a MAJA L2A processing and to download MAJA L2A products from PEPS. MAJA processing is implemented in two ways within PEPS :
+PEPS is the French Sentinel collaborative ground segment: https://peps.cnes.fr. PEPS is mirroring all the Sentinel data provided by ESA for Sentinel1 and 2 (L1C), and is providing a simplified access to those data sets. It also implements a few processors among which [MAJA atmospheric correction processor](http://www.cesbio.ups-tlse.fr/multitemp/?p=6203). This repository contains two scripts to submit a MAJA L2A processing and to download MAJA L2A products from PEPS. MAJA processing is implemented in two ways within PEPS :
 - single product MAJA processing (for which an browser interface is also available)
 - full time series MAJA processing (which is only available on the command line)
 
@@ -65,8 +65,6 @@ Two problem may cause the on demand processing with MAJA to be kept pending for 
 
 
 ## Old version
-We have kept here, the old script versions (the new ones are still in beta version)
-
 This script will ask PEPS to process a series of products based on a catalog request which can be made according to various criteria.  Then the processing is schedule. If more than 10 products are to be ordered, a confirmation is asked to the user, to avoid submitting erroneous requests to PEPS. 
 
 - `python ./peps_maja_process.py  -l Toulouse -a peps.txt -d 2017-11-01 -f 2017-12-01 -p prod_list_toulouse.txt` 
