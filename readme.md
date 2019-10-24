@@ -21,7 +21,7 @@ This code relies on python (it should work with python 2 and 3). It was developp
 
 ## Examples
 
-Full_Maja processing on peps is still an alpha version. We need an approval from a manager to open it to all users.  Meanwhile, go to the **old version** section. Using the on-demand MAJA process, two python programs are needed, one to submit the processing, and one to check completion, and to retrive the data it it is finished. 
+Using the on-demand MAJA process, two python programs are needed, one to submit the processing, and one to check completion, and to retrive the data it it is finished. 
  
 ### full_maja_process
 
