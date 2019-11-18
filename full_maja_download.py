@@ -49,7 +49,7 @@ def getURL(url, fileName, email, passwd):
 ###########################################################################
 
 
-def parse_json(json_file, write_dir):
+def parse_json(json_file, email, passwd, write_dir):
     with open(json_file) as data_file:
         data = json.load(data_file)
     status = data["USER_INFO"]["job_status"]
@@ -65,8 +65,8 @@ def parse_json(json_file, write_dir):
                 print("skipping {}: already on disk".format(L2AName))
             else:
                 print("downloading %s" % L2AName)
-                downloadFile(urlL2A, "%s/%s"%(write_dir,L2AName), email, passwd)
-        n_unproc =  int(data["USER_INFO"]["unprocessed"])
+                downloadFile(urlL2A, "%s/%s" % (write_dir, L2AName), email, passwd)
+        n_unproc = int(data["USER_INFO"]["unprocessed"])
         if n_unproc > 0:
             print("\nWarning: {:d} products have not been processed".format(n_unproc))
             print("For more information, please check {}".format(json_file))
@@ -75,8 +75,10 @@ def parse_json(json_file, write_dir):
         progress = data["USER_INFO"]["process"]
         print("Processing is not finished yet, please try again later")
         print("It takes usually 25 minutes per image + 1 hour for the first one")
-        print("Progress indicates %s, but the percentage is really exagerated" % progress)
-
+        print("Progress indicates %s, but the percentage is often exagerated" % progress)
+    elif status == "PENDING":
+        print("Processing is still pending")
+        print("CNES HPC center must be busy")
     # processing finished with error
     elif status == "ERROR" or status == "CANCELED":
         urlLog = data["USER_INFO"]["logs"][0]
@@ -108,14 +110,14 @@ else:
                       help="Path where the products should be downloaded", default='.')
     parser.add_option("-a", "--auth", dest="auth", action="store", type="string",
                       help="Peps account and password file")
-    parser.add_option("-g", "--log", dest="logName", action="store", type="string",
+    parser.add_option("-l", "--log", dest="logName", action="store", type="string",
                       help="log file name ", default='Full_Maja.log')
 
     (options, args) = parser.parse_args()
     parser.check_required("-a")
 
-    if options.write_dir is None:
-        options.write_dir = os.getcwd()
+    if not (os.path.exists(options.write_dir)):
+        os.mkdir(options.write_dir)
 print("---------------------------------------------------------------------------")
 
 
@@ -124,10 +126,14 @@ print("-------------------------------------------------------------------------
 # ====================
 try:
     f = open(options.auth)
-    (email, passwd) = f.readline().split(' ')
-    if passwd.endswith('\n'):
-        passwd = passwd[:-1]
-    f.close()
+    try:
+        (email, passwd) = f.readline().split(' ')
+        if passwd.endswith('\n'):
+            passwd = passwd[:-1]
+        f.close()
+    except ValueError:
+        print("error with password file content")
+        sys.exit(-2)
 except IOError:
     print("error with password file")
     sys.exit(-2)
@@ -156,9 +162,10 @@ getURL(urlStatus, statusFileName, email, passwd)
 
 peps = "http://peps.cnes.fr/resto/wps"
 
-url = "{}?request=execute&service=WPS&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=wps_id={}&status=false&storeExecuteResponse=false".format(peps, wpsId)
+url = "{}?request=execute&service=WPS&version=1.0.0&identifier=PROCESSING_STATUS&datainputs=wps_id={}&status=false&storeExecuteResponse=false".format(
+    peps, wpsId)
 
-# Update log files 
+# Update log files
 print("Updating status files: {}".format(url))
 req = requests.get(url, auth=(email, passwd))
 
@@ -185,6 +192,7 @@ print("Execution report: {}".format(urlJSON))
 JSONFileName = options.logName.replace('log', 'json')
 getURL(urlJSON, JSONFileName, email, passwd)
 
-# check and, if finished, download products
-parse_json(JSONFileName,options.write_dir)
+
+# parse the resul json file, and download products if processing is completed
+parse_json(JSONFileName, email, passwd, options.write_dir)
 print("---------------------------------------------------------------------------")
