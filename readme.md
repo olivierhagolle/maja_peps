@@ -29,7 +29,7 @@ This script will ask PEPS to process a continuous time series (from a begin date
 
 The command line is very simple :
 
- `python ./full_maja_process.py  -t 31TCJ -a peps.txt -d 2017-07-01 -f 2018-01-01 -g 31TCJ_20170101.log` 
+ `python ./full_maja_process.py  -t 31TCJ -a peps.txt -d 2017-07-01 -e 2018-01-01 -l 31TCJ_20170101.log` 
 
 It will submit Maja processing for the Sentinel-2 L1C products acquired in the last 6 months of 2017 above Toulouse (31TCJ tile). A log file is issued which is necessary to check the completion and download the products with full_maja_download.py. If you want to start several tiles in parallel, remember to specify a different logfile, or you will lose the information to retrieve the data. If you have done such an error (I know it will happen ;) ), it is still possible to retrieve the results from the PEPS interface after having logged.
 
@@ -39,7 +39,7 @@ The option `-a peps.txt` provides the authentification information (see below fo
 
 Sometimes, a given tile is fully covered by one orbit, and only partially by another one. To save processing time and space, you can select to process only one orbut by specifying the orbit obtion with -o option.
 
-- `python ./full_maja_process.py  -t 31TCJ -o 51 -a peps.txt -d 2017-07-01 -f 2018-01-01 -g 31TCJ_20170101.log` 
+- `python ./full_maja_process.py  -t 31TCJ -o 51 -a peps.txt -d 2017-07-01 -e 2018-01-01 -l 31TCJ_20170101.log` 
 
 It will only process the data from relative orbit 51. But if you want to process the two orbits for one tile, it is better to specify nothing than launching two separate processings with each orbit.
 
@@ -47,11 +47,11 @@ It will only process the data from relative orbit 51. But if you want to process
 
 ### full_maja_download
 
- - ` python full_maja_download.py -a peps.txt -g 31TCJ_20170101.log`
+ - ` python full_maja_download.py -a peps.txt -l 31TCJ_20170101.log`
  
 The syntax of full_maja_download.py is even simpler, only the authentification information and the log file are necessary.
 
- - ` python full_maja_download.py -a peps.txt -g 31TCJ_20170101.log -w /path/to/31TCJ`
+ - ` python full_maja_download.py -a peps.txt -l 31TCJ_20170101.log -w /path/to/31TCJ`
 
 You may also specify an output directory for downloading the datasets.
 
