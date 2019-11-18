@@ -95,22 +95,22 @@ def check_params(start_date, stop_date, tileid, orbit=None):
 
     start_date = datetime(int(start_date[0]), int(start_date[1]), int(start_date[2]))
     stop_date = datetime(int(stop_date[0]), int(stop_date[1]), int(stop_date[2]))
-    
+
     days = (stop_date - start_date).days
-    
+
     if days < 55 or days > 366:
         raise ValueError("The time interval must be between 2 months and 1 year")
-    
+
     # Check orbit number
-    if orbit :
+    if orbit:
         if orbit > 143 or orbit < 1:
             raise ValueError("The relative orbit number must be between 1 and 143")
-    
+
     # Check tile regex
     re_tile = re.compile("^[0-6][0-9][A-Za-z]([A-Za-z]){0,2}%?$")
     if not re_tile.match(tileid):
         raise ValueError("The tile ID is in the wrong format")
-    
+
 
 # ===================== MAIN
 # ==================
@@ -121,9 +121,9 @@ if len(sys.argv) == 1:
     print('      ' + sys.argv[0] + ' [options]')
     print("     Aide : ", prog, " --help")
     print("        ou : ", prog, " -h")
-    print("example  : python %s -a peps.txt -t 31TCJ -d 2018-01-01 -f 2018-03-01 -w TEST_MAJA" %
+    print("example  : python %s -a peps.txt -t 31TCJ -o 51 -l Full_MAJA_31TCJ_51_2019.log -d 2018-01-01 -e 2018-03-01" %
           sys.argv[0])
-    print("example  : python %s -a peps.txt -t 31TCJ -o 51 -g Full_MAJA_31TCJ_51_2019.log -d 2018-01-01 -f 2018-03-01" %
+    print("example  : python %s -a peps.txt -t 31TCJ -o 51 -l Full_MAJA_31TCJ_51_2019.log -d 2018-01-01 -e 2018-03-01" %
           sys.argv[0])
     sys.exit(-1)
 else:
@@ -140,9 +140,9 @@ else:
                       help="tile name like 31TCK')", default=None)
     parser.add_option("-o", "--orbit", dest="orbit", action="store", type="int",
                       help="Orbit Path number", default=None)
-    parser.add_option("-f", "--end_date", dest="end_date", action="store", type="string",
+    parser.add_option("-e", "--end_date", dest="end_date", action="store", type="string",
                       help="end date, fmt('2015-12-23')", default='9999-01-01')
-    parser.add_option("-g", "--log", dest="logName", action="store", type="string",
+    parser.add_option("-l", "--log", dest="logName", action="store", type="string",
                       help="log file name ", default='Full_Maja.log')
     parser.add_option("--json", dest="search_json_file", action="store", type="string",
                       help="Output search JSON filename", default=None)
@@ -161,7 +161,22 @@ if options.start_date is not None:
     if options.end_date is not None:
         end_date = options.end_date
     else:
-        end_date = date.today().isoformat()
+        end_date = datetime.date.today().isoformat()
+
+# check conditions on dates
+sdate = datetime.strptime(start_date, '%Y-%m-%d')
+edate = datetime.strptime(end_date, '%Y-%m-%d')
+if edate < datetime.strptime('2016-04-01', '%Y-%m-%d'):
+    print("because of missing information on ESA L1C products, start_date must be greater than '2016-04-01'")
+    sys.exit(-5)
+
+if (edate-sdate).days < 50:
+    print("at least 50 days should be provided to MAJA to allow a proper initialisation")
+    sys.exit(-5)
+
+if (edate-sdate).days > 366:
+    print("due to processing and disk limitations, processing is limited to a one year period per command line")
+    sys.exit(-5)
 
 
 if options.tile.startswith('T'):
@@ -211,9 +226,11 @@ if not options.no_download:
         if "Process FULL_MAJA accepted" in req.text.encode('utf-8'):
             print("Request OK !")
             print("To check completion and download results:")
-            print("     python full_maja_download.py -a peps.txt -g {}".format(options.logName))
+            print("     python full_maja_download.py -a peps.txt -l {} -w FULL_MAJA_OUTPUT_DIR".format(options.logName))
         else:
             print("Something is wrong : please check {} file".format(options.logName))
+    elif req.status_code == 401:
+        print("Unauthorized request, please check the auth file with provided -a option")
     else:
         print("Wrong request status {}".format(str(req.status_code)))
     print("---------------------------------------------------------------------------")
