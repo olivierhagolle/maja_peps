@@ -219,11 +219,11 @@ else:
 print(url)
 if not options.no_download:
     req = requests.get(url, auth=(email, passwd))
-    with open(options.logName, "w") as f:
+    with open(options.logName, "wb") as f:
         f.write(req.text.encode('utf-8'))
     print("---------------------------------------------------------------------------")
     if req.status_code == 200:
-        if "Process FULL_MAJA accepted" in req.text.encode('utf-8'):
+        if b"Process FULL_MAJA accepted" in req.text.encode('utf-8'):
             print("Request OK !")
             print("To check completion and download results:")
             print("     python full_maja_download.py -a peps.txt -l {} -w FULL_MAJA_OUTPUT_DIR".format(options.logName))
