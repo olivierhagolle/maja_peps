@@ -37,7 +37,10 @@ def downloadFile(url, fileName, email, password):
 def getURL(url, fileName, email, passwd):
     req = requests.get(url, auth=(email, passwd), verify=False)
     with open(fileName, "w") as f:
-        f.write(req.text.encode('utf-8'))
+        if sys.version_info[0] < 3:
+            f.write(req.text.encode('utf-8'))
+        else:    
+            f.write(req.text)
         if req.status_code == 200:
             print("Request OK")
         else:
